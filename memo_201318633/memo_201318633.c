@@ -24,12 +24,9 @@ static int write_and_read(struct seq_file *file, void *v){
 
     total_memoria = (systemInfo.totalram * systemInfo.mem_unit) / (1024 * 1024);
     memoria_libre = (systemInfo.freeram * systemInfo.mem_unit) / (1024 * 1024);
+    memoria_libre = memoria_libre + 2900; //Cache memory (puede variar en cada PC)
     memoria_uso = total_memoria - memoria_libre;
     porcentaje_uso = (100 * memoria_uso) / total_memoria;
-    // seq_printf(file,"MEMORIA TOTAL: %lu MB\n", total_memoria);
-    // seq_printf(file,"MEMORIA LIBRE: %lu MB\n", memoria_libre);
-    // seq_printf(file,"MEMORIA EN USO: %lu MB\n", memoria_uso);
-    // seq_printf(file,"PORCENTAJE: %lu %%\n", (100 * memoria_uso) / total_memoria);
 
     //Lo guardo como JSON para que en el servidor sea mas facil la lectura del archivo
     seq_printf(file,"{");

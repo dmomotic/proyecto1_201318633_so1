@@ -19,14 +19,30 @@ func getRAMInfo() string {
 	return string(filedata)
 }
 
+//Obtengo la informacion del CPU
+func getCPUInfo() string {
+	filedata, err := ioutil.ReadFile("/proc/cpu_201318633")
+	if err != nil {
+		fmt.Println("Error al abrir cpu_201318633")
+		return ""
+	}
+	return string(filedata)
+}
+
 func main() {
 	//Servidor
 	mux := http.NewServeMux()
 
 	//Ruta que retorna JSON con la informacion de la RAM
-	mux.HandleFunc("/home", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/ram", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(getRAMInfo()))
+	})
+
+	//Ruta que retorna JSON con la informacion del CPU
+	mux.HandleFunc("/cpu", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(getCPUInfo()))
 	})
 
 	//Ruta que retorna index.html
