@@ -22,21 +22,8 @@
 
   <div class="container-fluid" id="app">
     <div class="row">
-      <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-        <div class="position-sticky pt-3">
-          <ul class="nav flex-column">
-            <li class="nav-item">
-              <a class="nav-link" aria-current="page" href="#">
-                <span data-feather="home"></span>
-                Home
-              </a>
-            </li>
-          </ul>
-        </div>
-      </nav>
-
       <!-- RAM Monitor -->
-      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <main class="col-sm-12">
         <div
           class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
           <h1 class="h2">RAM</h1>
@@ -75,7 +62,7 @@
       </main>
 
       <!-- CPU Monitor -->
-      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <main class="col-sm-12">
         <div
           class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
           <h1 class="h2">CPU</h1>
@@ -87,6 +74,7 @@
           </div>
         </div>
 
+        <!-- Card con informacion general de los procesos -->
         <div class="card border-dark">
           <div class="card-header" data-bs-toggle="collapse" data-bs-target="#collapseExample2" aria-expanded="false"
             aria-controls="collapseExample2">
@@ -107,6 +95,23 @@
             </ul>
           </div>
         </div>
+        
+        <!-- Card con todos los procesos -->
+        <div class="card border-dark my-5">
+          <div class="card-header" data-bs-toggle="collapse" data-bs-target="#collapseExample3" aria-expanded="false"
+            aria-controls="collapseExample3">
+            Procesos
+          </div>
+          <div class="card-body collapse" id="collapseExample3">
+            <div class="row">
+              <div class="col-md-4" v-for="(item, index) in cpu.procesos" :key="index">
+                <!-- Componente personalizado -->
+                <proceso :proceso="item.proceso" :id="item.id" :status="item.status" :hijos="item.hijos"/>
+              </div>
+            </div>
+          </div>
+        </div>
+      
       </main>
 
     </div>
@@ -122,6 +127,9 @@
 
   <!-- Apexchart -->
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+  <!-- Proceso component -->
+  <script src="js/proceso.vue.js"></script>
 
   <!-- production version, optimized for size and speed -->
   <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2"></script> -->

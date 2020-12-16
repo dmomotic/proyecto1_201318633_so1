@@ -1,48 +1,54 @@
 axios.defaults.baseURL = 'http://localhost:8000';
 
+Vue.component("Proceso", Proceso);
+
 new Vue({
   el: '#app',
   mounted() {
-    this.chart = new ApexCharts(document.querySelector("#chart"), this.getChartOptions('ram'))
+    //RAM
+    this.chart = new ApexCharts(document.querySelector("#chart"), this.getChartOptions(['ram']))
     this.chart.render()
+    //CPU
+    this.chartCPU = new ApexCharts(document.querySelector("#chartCPU"), this.getChartOptions(['cpu1','cpu2','cpu3','cpu4']))
+    this.chartCPU.render()
   },
   beforeDestory() {
-    clearInterval()
+    clearInterval(this.interval)
   },
-  data: {
-    chart: null,
-    seconds: 0,
-    data: [],
-    ramUsage: 0,
-    totalRam: 0,
-    watchingRam: false,
-    cpu: {
-      procesos: [], //{id, proceso, status, hijos}
-      total: 0,
-      ejecucion: 0,
-      suspendidos: 0,
-      detenidos: 0,
-      zombies: 0, 
-      desconocido: 0
-    },
-    chartCPU: null,
-    watchingCPU: false
+  data() {
+    return {
+      chart: null,
+      seconds: 0,
+      data: [],
+      ramUsage: 0,
+      totalRam: 0,
+      watchingRam: false,
+      cpu: {
+        procesos: [], //{id, proceso, status, hijos}
+        total: 0,
+        ejecucion: 0,
+        suspendidos: 0,
+        detenidos: 0,
+        zombies: 0,
+        desconocido: 0
+      },
+      cpu1: [],
+      cpu2: [],
+      cpu3: [],
+      cpu4: [],
+      chartCPU: null,
+      watchingCPU: false
+    }
   },
   methods: {
-    getChartOptions(name) {
+    getChartOptions(names) {
       return {
         chart: {
           type: 'line'
         },
-        series: [{
-          name: name,
-          data: []
-        }],
+        series: names.map((name) => ({name, data: []})),
         xaxis: {
           categories: []
-        },
-        stroke: {
-          curve: 'smooth'
         },
         chart: {
           height: '350px'
@@ -52,12 +58,10 @@ new Vue({
     startRAMInfo() {
       this.watchingRam = true;
       this.setInterval()
-      // this.interval = setInterval(() => this.fetchRAMData(), 2500)
     },
     stopRAMInfo() {
       this.watchingRam = false;
       this.setInterval()
-      // clearInterval(this.interval)
     },
     fetchRAMData() {
       axios.get('/ram').then((res) => {
@@ -77,35 +81,61 @@ new Vue({
         data: this.data
       }])
     },
-    fetchCPUData(){
-      axios.get('/cpu').then((res) => {
-        const info = res.data;
-        if(info != null){
+    pushCPUUsage(value1, value2, value3, value4){
+      //cpu1
+      if(this.cpu1.length == 25) this.cpu1.splice(0,1)
+      this.cpu1.push(value1)
+      //cpu2
+      if(this.cpu2.length == 25) this.cpu2.splice(0,1)
+      this.cpu2.push(value2)
+      //cpu3
+      if(this.cpu3.length == 25) this.cpu3.splice(0,1)
+      this.cpu3.push(value3)
+      //cpu4
+      if(this.cpu4.length == 25) this.cpu4.splice(0,1)
+      this.cpu4.push(value4)
+      //Updating
+      this.chartCPU.updateSeries([
+        {name: 'cpu1', data: this.cpu1},
+        {name: 'cpu2', data: this.cpu2},
+        {name: 'cpu3', data: this.cpu3},
+        {name: 'cpu4', data: this.cpu4},
+      ])
+    },
+    fetchCPUData() {
+      axios.all([
+        axios.get('/cpu'),
+        axios.get('/cpu/usage'),
+      ]).then(axios.spread((res1, res2) => {
+        //Data from proc
+        const info = res1.data;
+        if (info != null) {
           this.cpu = info;
-        }else{
+        } else {
           console.log('No se obtuvo la informacion del CPU')
         }
-      }).catch((e) => {
-        console.log(e)
-      })
+        //Data from go
+        const usage = res2.data;
+        this.pushCPUUsage(usage.cpu1, usage.cpu2, usage.cpu3, usage.cpu4)
+      }))
     },
-    setInterval(){
+    setInterval() {
       clearInterval(this.interval)
-      const time = 2500
+      const time = 3000
       //cpu && ram
-      if(this.watchingCPU && this.watchingRam){
+      if (this.watchingCPU && this.watchingRam) {
         this.interval = setInterval(() => {
           this.fetchRAMData()
           this.fetchCPUData()
         }, time)
-        
+
       }
       //ram
-      else if(this.watchingRam){
+      else if (this.watchingRam) {
         this.interval = setInterval(() => this.fetchRAMData(), time)
       }
       //cpu
-      else if(this.watchingCPU){
+      else if (this.watchingCPU) {
         this.interval = setInterval(() => this.fetchCPUData(), time)
       }
     },
@@ -116,7 +146,7 @@ new Vue({
     stopCPUInfo() {
       this.watchingCPU = false;
       this.setInterval()
-    },
+    }
   },
   computed: {
     stripedProgressBarRam() {
