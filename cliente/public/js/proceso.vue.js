@@ -8,6 +8,9 @@ const Proceso = {
         <p class="fw-bold">
           {{ id }} - {{ proceso }} - {{ status }} ({{ hijos.length }})
           <div class="col">
+            {{ usuario }} - {{ ram }} MB ~ {{ porcentaje }} %
+          </div>
+          <div class="col">
             <button type="button" class="btn btn-danger btn-sm" @click.prevent="killProcess(id)">Kill</button>
           </div>
         </p>
@@ -24,7 +27,10 @@ const Proceso = {
     'proceso',
     'id',
     'status',
-    'hijos'
+    'hijos', 
+    'ram',
+    'porcentaje',
+    'usuario'
   ],
   data() {
     return {

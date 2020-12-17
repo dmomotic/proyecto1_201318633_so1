@@ -32,6 +32,8 @@ unsigned int desconocido = 0;
 int contador1 = 0;
 int contador2 = 0;
 
+unsigned long ram = 0;
+
 char *get_task_state(long state)
 {
   total++;
@@ -54,14 +56,115 @@ char *get_task_state(long state)
     return "SLEEPING";
   default:
     desconocido++;
-    // sprintf(buffer, "UNKNOWN:%ld\n", state);
-    // return buffer;
     return "UNKNOWN";
+  }
+}
+
+//getent passwd
+char *get_owner_of_process(int code){
+  switch (code)
+  {
+  case 0: 
+    return "root";
+  case 1:
+    return "daemon";
+  case 2:
+    return "bin";
+  case 3:
+    return "diego";
+  case 4:
+    return "sync";
+  case 5:
+    return "games";
+  case 6:
+    return "man";
+  case 7:
+    return "lp";
+  case 8:
+    return "mail";
+  case 9:
+    return "news";
+  case 10:
+    return "uucp";
+  case 13:
+    return "proxy";
+  case 33:
+    return "www-data";
+  case 34:
+    return "backup";
+  case 38:
+    return "list";
+  case 39:
+    return "irc";
+  case 41:
+    return "gnats";
+  case 65534:
+    return "nobody";
+  case 100:
+    return "systemd-network";
+  case 101:
+    return "systemd-resolve";
+  case 102:
+    return "systemd-timesync";
+  case 103:
+    return "messagebus";
+  case 104:
+    return "syslog";
+  case 105:
+    return "_apt";
+  case 106:
+    return "tss";
+  case 107:
+    return "uuidd";
+  case 108:
+    return "tcpdump";
+  case 109:
+    return "avahi-autoipd";
+  case 110:
+    return "usbmux";
+  case 111:
+    return "rtkit";
+  case 112:
+    return "dnsmasq";
+  case 113:
+    return "cups-pk-helper";
+  case 114:
+    return "speech-dispatcher";
+  case 115:
+    return "avahi";
+  case 116:
+    return "kernoops";
+  case 117:
+    return "saned";
+  case 118:
+    return "nm-openvpn";
+  case 119:
+    return "hplip";
+  case 120:
+    return "whoopsie";
+  case 121:
+    return "colord";
+  case 122:
+    return "geoclue";
+  case 123:
+    return "pulse";
+  case 124:
+    return "gnome-initial-setup";
+  case 125:
+    return "gmd";
+  case 1000:
+    return "diego";
+  case 999:
+    return "systemd-coredump";
+  default:
+    return "root";
   }
 }
 
 static int write_and_read(struct seq_file *file, void *v)
 {
+  ram = 0;
+
   total = 0;
   ejecucion = 0;
   suspendidos = 0;
@@ -83,7 +186,13 @@ static int write_and_read(struct seq_file *file, void *v)
     seq_printf(file, "{"); 
     seq_printf(file,"\"id\":%d,", task_list->pid); 
     seq_printf(file,"\"proceso\":\"%s\",", task_list->comm); 
-    // seq_printf(file,"\"status\":%ld,", task_list->state);
+    if(task_list->mm){
+      ram = (get_mm_rss(task_list->mm) * 4096) / (1024 * 1024); //systemInfo.mem_unit = 4096
+    }
+    seq_printf(file,"\"ram\":\"%lu\",", ram);
+    seq_printf(file,"\"porcentaje\":\"%lu\",", ram * 100 / 11896);  //systemInfo.totalram = 11896
+    seq_printf(file,"\"proceso\":\"%s\",", task_list->comm);
+    seq_printf(file,"\"usuario\":\"%s\",", get_owner_of_process((int) task_list->sessionid));
     seq_printf(file,"\"status\":\"%s\",", get_task_state(task_list->state));
     
     seq_printf(file, "\"hijos\":"); 
@@ -144,3 +253,4 @@ static void salida(void)
 
 module_init(inicio);
 module_exit(salida);
+

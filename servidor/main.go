@@ -33,6 +33,10 @@ func getCPUInfo() string {
 	return string(filedata)
 }
 
+func getUserName() {
+	//getent passwd "$uid" | cut -d: -f1
+}
+
 //Obtengo el porcentaje de uso del CPU con la ayuda de GO
 func getCPUUsage() string {
 	cpuPercents, err := cpu.Percent(time.Second, true)

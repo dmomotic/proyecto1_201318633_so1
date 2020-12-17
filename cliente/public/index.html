@@ -106,7 +106,15 @@
             <div class="row">
               <div class="col-md-4" v-for="(item, index) in cpu.procesos" :key="index">
                 <!-- Componente personalizado -->
-                <proceso :proceso="item.proceso" :id="item.id" :status="item.status" :hijos="item.hijos"/>
+                <proceso 
+                  :proceso="item.proceso" 
+                  :id="item.id" 
+                  :status="item.status" 
+                  :hijos="item.hijos" 
+                  :ram="item.ram"
+                  :porcentaje="item.porcentaje"
+                  :usuario="item.usuario"
+                />
               </div>
             </div>
           </div>

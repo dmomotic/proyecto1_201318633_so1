@@ -4,4 +4,5 @@
 cpu_201318633/*
 !/cpu_201318633/Makefile
 !/cpu_201318633/cpu_201318633.c
+*/__pycache__
 .vscode
